@@ -2,7 +2,7 @@
 
 **定时自动化 · 用量工作台 · 技能与 MCP Server 管理 · 长期记忆引擎** —— 一套插件装齐 DSH 四个工作台。
 
-从 [statem-li/dsh-webui](https://github.com/statem-li/dsh-webui) v0.5.1 拆出这四个模块，
+从 [Kr-ATG/dsh-webui](https://github.com/Kr-ATG/dsh-webui) v0.5.1 拆出这四个模块，
 按 DSH `0.1.2-alpha.1` 的现行契约重写为独立插件。全部通过 `cordis.patch.yml` 的
 bundle 机制挂载，**不碰官方源码一行**。
 
@@ -13,7 +13,7 @@ bundle 机制挂载，**不碰官方源码一行**。
 ## 一句话安装
 
 ```bash
-dsh plugin --profile web add github:statem-li/dsh-triad
+dsh plugin --profile web add github:Kr-ATG/dsh-triad
 ```
 
 然后**重启 DSH**。
@@ -204,7 +204,7 @@ pruneNeverHitDays 21
 ## 从源码构建
 
 ```bash
-git clone https://github.com/statem-li/dsh-triad.git
+git clone https://github.com/Kr-ATG/dsh-triad.git
 cd dsh-triad
 pnpm install
 pnpm build

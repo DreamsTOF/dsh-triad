@@ -12,10 +12,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/statem-li/dsh-triad.git"
+    "url": "git+https://github.com/Kr-ATG/dsh-triad.git"
   },
-  "homepage": "https://github.com/statem-li/dsh-triad",
-  "bugs": "https://github.com/statem-li/dsh-triad/issues",
+  "homepage": "https://github.com/Kr-ATG/dsh-triad",
+  "bugs": "https://github.com/Kr-ATG/dsh-triad/issues",
   "type": "module",
   "main": "./lib/index.js",
   "exports": {
