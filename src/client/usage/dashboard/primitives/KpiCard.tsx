@@ -1,7 +1,9 @@
-/** 环比徽章颜色/箭头。 */
-function deltaView(delta: number): { text: string; color: string } {
-  if (delta > 0) return { text: `↑ ${delta >= 10 ? Math.round(delta) : delta.toFixed(1)}%`, color: 'var(--dsw-alias-state-success-primary)' }
-  if (delta < 0) return { text: `↓ ${Math.abs(delta) >= 10 ? Math.round(Math.abs(delta)) : Math.abs(delta).toFixed(1)}%`, color: 'var(--dsw-alias-state-error-primary)' }
+import { RiseIcon, FallIcon } from '../hub'
+
+/** 环比徽章颜色/箭头（SVG 涨跌箭头）。 */
+function deltaView(delta: number): { text: React.ReactNode; color: string } {
+  if (delta > 0) return { text: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}><RiseIcon size={10} /> {delta >= 10 ? Math.round(delta) : delta.toFixed(1)}%</span>), color: 'var(--dsw-alias-state-success-primary)' }
+  if (delta < 0) return { text: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}><FallIcon size={10} /> {Math.abs(delta) >= 10 ? Math.round(Math.abs(delta)) : Math.abs(delta).toFixed(1)}%</span>), color: 'var(--dsw-alias-state-error-primary)' }
   return { text: '持平', color: 'var(--dsw-alias-label-tertiary)' }
 }
 

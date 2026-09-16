@@ -32,7 +32,7 @@ import { ErrorCard } from './primitives/ErrorCard'
 import { EmptyState } from './primitives/EmptyState'
 import { useIsMobile } from '../../responsive'
 import { modalStaggerClass } from '../../modal-animation'
-import { css, HubStat, HubStatDetail, HubSection, callsIcon, inputIcon, outputIcon, tokensIcon } from './hub'
+import { css, HubStat, HubStatDetail, HubSection, callsIcon, inputIcon, outputIcon, tokensIcon, CheckIcon, RiseIcon, FallIcon } from './hub'
 
 export interface TrendTabProps {
   range: DateRange
@@ -87,9 +87,9 @@ export function Stat({ label, value, exact, sub, delta, first }: {
   const deltaView = delta === undefined || delta === null
     ? null
     : delta > 0
-      ? { text: `↑${delta >= 10 ? Math.round(delta) : delta.toFixed(1)}%`, color: 'var(--dsw-alias-state-success-primary)' }
+      ? { text: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}><RiseIcon size={10} />{delta >= 10 ? Math.round(delta) : delta.toFixed(1)}%</span>), color: 'var(--dsw-alias-state-success-primary)' }
       : delta < 0
-        ? { text: `↓${Math.abs(delta) >= 10 ? Math.round(Math.abs(delta)) : Math.abs(delta).toFixed(1)}%`, color: 'var(--dsw-alias-state-error-primary)' }
+        ? { text: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}><FallIcon size={10} />{Math.abs(delta) >= 10 ? Math.round(Math.abs(delta)) : Math.abs(delta).toFixed(1)}%</span>), color: 'var(--dsw-alias-state-error-primary)' }
         : { text: '持平', color: 'var(--dsw-alias-label-tertiary)' }
   return (
     <div style={{
@@ -146,8 +146,8 @@ function anomalyCountOf(days: UsageDay[]): number {
 
 /** 环比 chip：较昨日/较上期 + 箭头 + 百分比（调用侧保证 pct 非 null；上一期无数据时由调用侧整行省略）。 */
 function DeltaChip({ pct, label }: { pct: number; label: string }): JSX.Element {
-  if (pct > 0) return <><span style={{ color: 'var(--dsw-alias-label-tertiary)' }}>{label}</span> ▲{pct >= 10 ? Math.round(pct) : pct.toFixed(1)}%</>
-  if (pct < 0) return <><span style={{ color: 'var(--dsw-alias-label-tertiary)' }}>{label}</span> ▼{Math.abs(pct) >= 10 ? Math.round(Math.abs(pct)) : Math.abs(pct).toFixed(1)}%</>
+  if (pct > 0) return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><span style={{ color: 'var(--dsw-alias-label-tertiary)' }}>{label}</span> <RiseIcon size={10} />{pct >= 10 ? Math.round(pct) : pct.toFixed(1)}%</span>
+  if (pct < 0) return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><span style={{ color: 'var(--dsw-alias-label-tertiary)' }}>{label}</span> <FallIcon size={10} />{Math.abs(pct) >= 10 ? Math.round(Math.abs(pct)) : Math.abs(pct).toFixed(1)}%</span>
   return <><span style={{ color: 'var(--dsw-alias-label-tertiary)' }}>{label}</span> 持平</>
 }
 
@@ -538,7 +538,7 @@ export function TrendTab({ range, rangeLabel, onJumpAccounts, onJumpSignal, onJu
                         <div className={css.dropMenu} role="menu" aria-label="堆叠口径" style={{ left: 'auto', right: 0 }}>
                           {([['io', '输入+输出', '不含缓存'], ['full', '全口径', '含缓存读取']] as Array<['io' | 'full', string, string]>).map(([key, name, meta]) => (
                             <button key={key} type="button" role="menuitemradio" className={css.dropItem} aria-checked={stackMode === key} onClick={() => { setStackMode(key); setStackOpen(false) }}>
-                              <span className={css.dropCheck} data-on={stackMode === key || undefined}>✓</span>
+                              <span className={css.dropCheck} data-on={stackMode === key || undefined}><CheckIcon size={11} /></span>
                               {name}
                               <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--dsw-alias-label-tertiary)' }}>{meta}</span>
                             </button>
@@ -561,7 +561,7 @@ export function TrendTab({ range, rangeLabel, onJumpAccounts, onJumpSignal, onJu
                         <div className={css.dropMenu}>
                           {([['auto', 'Tokens（自动）'], ['wan', '万'], ['yi', '亿']] as Array<[UnitKey, string]>).map(([key, name]) => (
                             <button key={key} type="button" className={css.dropItem} aria-checked={unit === key} onClick={() => { setUnit(key); setUnitOpen(false) }}>
-                              <span className={css.dropCheck} data-on={unit === key || undefined}>✓</span>
+                              <span className={css.dropCheck} data-on={unit === key || undefined}><CheckIcon size={11} /></span>
                               {name}
                             </button>
                           ))}

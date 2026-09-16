@@ -4,6 +4,7 @@ import { relativeTime } from '../format'
 import { alertColor } from '../theme'
 import { QuotaWindowRow } from './QuotaWindowRow'
 import { PoolQuotaPanel } from './PoolQuotaPanel'
+import { WarnIcon } from '../hub'
 
 /**
  * 供应商余额/订阅卡片（网格布局，替代官方列表行）。
@@ -102,8 +103,8 @@ export function ProviderGroup({ provider, onRequireCredential, refreshKey, index
 
       {hasAlert && (
         <div style={{ marginBottom: 10 }}>
-          <span style={alertStyle(level as 'critical' | 'warning')}>
-            ⚠ 剩余 {account?.alert?.value ?? provider.alert?.value ?? 0}%
+          <span style={{ ...alertStyle(level as 'critical' | 'warning'), display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <WarnIcon size={11} /> 剩余 {account?.alert?.value ?? provider.alert?.value ?? 0}%
           </span>
         </div>
       )}

@@ -467,6 +467,68 @@ export function daysIcon(size = 18, stroke = 1.8): JSX.Element {
   )
 }
 
+/* ── 通用小尺寸 SVG 图标（替代 ✓ ✕ ⚠ ▲ ▼ ↑ ↓ 等文本符号，跨 tab 共用） ── */
+
+/** 对勾（下拉选中态）。 */
+export function CheckIcon({ size = 12, stroke = 2.4 }: { size?: number; stroke?: number }): JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+
+/** 关闭叉（搜索清除 / 弹窗关闭）。 */
+export function CloseIcon({ size = 12, stroke = 2.2 }: { size?: number; stroke?: number }): JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+
+/** 告警三角（错误卡 / 配额告警）。 */
+export function WarnIcon({ size = 14, stroke = 1.8 }: { size?: number; stroke?: number }): JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  )
+}
+
+/** 上涨箭头（环比上升，替代 ▲ ↑）。 */
+export function RiseIcon({ size = 10, stroke = 2.4 }: { size?: number; stroke?: number }): JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+      <line x1="12" y1="19" x2="12" y2="5" />
+      <polyline points="5 12 12 5 19 12" />
+    </svg>
+  )
+}
+
+/** 下跌箭头（环比下降，替代 ▼ ↓）。 */
+export function FallIcon({ size = 10, stroke = 2.4 }: { size?: number; stroke?: number }): JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <polyline points="19 12 12 19 5 12" />
+    </svg>
+  )
+}
+
+/** tone → 实色（统计卡标签前简化色块用）。 */
+function toneSolid(tone: 'blue' | 'green' | 'violet' | 'orange'): string {
+  switch (tone) {
+    case 'blue': return 'var(--dsw-alias-state-business-primary, #4176e6)'
+    case 'green': return 'var(--dsw-alias-state-success-primary, #22c55e)'
+    case 'violet': return '#7c5cf0'
+    case 'orange': return 'var(--dsw-alias-state-warn-primary, #f59e0b)'
+  }
+}
+
 /** 左栏分类项。 */
 export function HubCatItem({ active, icon, label, count, warn, onClick, children }: {
   active: boolean
@@ -489,7 +551,7 @@ export function HubCatItem({ active, icon, label, count, warn, onClick, children
   )
 }
 
-/** 统计卡：宽卡 + hover 悬浮 desc + 点击展开明细。 */
+/** 统计卡：两行内容（标签+主值同行 / 副行另起）+ hover 悬浮 desc + 点击展开明细（无徽章图标，标签前仅简化色块；icon/iconShape 参数兼容保留）。 */
 export function HubStat({ tone, icon, label, value, valueWarn, sub, subTone, desc, open, onToggle, delay, iconShape = 'circle' }: {
   tone: 'blue' | 'green' | 'violet' | 'orange'
   icon: ReactNode
@@ -508,15 +570,20 @@ export function HubStat({ tone, icon, label, value, valueWarn, sub, subTone, des
   iconShape?: 'circle' | 'square'
 }): JSX.Element {
   const style: CSSProperties = { animationDelay: `${delay ?? 0}ms` }
+  void icon
+  void iconShape
   return (
     <button type="button" className={css.stat} style={style} data-open={open || undefined} onClick={onToggle}>
-      <span className={css.statIconCol}>
-        <span className={css.statIcon} data-tone={tone} data-shape={iconShape === 'square' ? 'square' : undefined}>{icon}</span>
-        <i className={css.statGlow} data-tone={tone} aria-hidden="true" />
-      </span>
       <span className={css.statBody}>
-        <span className={css.statLabel}>{label}</span>
-        <span className={css.statValue} data-tone={valueWarn ? 'warn' : undefined}>{value}</span>
+        <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
+          <span className={css.statLabel} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flex: 'none' }}>
+            <svg width={9} height={9} viewBox="0 0 9 9" aria-hidden="true" style={{ flex: 'none' }}>
+              <rect width={9} height={9} rx={2.5} fill={toneSolid(tone)} opacity={0.9} />
+            </svg>
+            {label}
+          </span>
+          <span className={css.statValue} data-tone={valueWarn ? 'warn' : undefined} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</span>
+        </span>
         {sub !== undefined && <span className={css.statSub} data-tone={subTone !== 'flat' ? subTone : undefined}>{sub}</span>}
       </span>
       {desc !== undefined && <span className={css.statDesc} role="note">{desc}</span>}

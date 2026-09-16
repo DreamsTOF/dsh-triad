@@ -5,6 +5,8 @@
  *  - 每周：当天指标值（按周滚动窗口逐日着色）；
  *  - 累计：自首个有记录日起的滚动累计（跨 52 周窗口，保持曲线连续）。
  *
+ * 布局：格子固定 14px 方格，不拉伸；月份标签按像素定位，与格子列对齐。
+ *
  * 顶部月份标签（每周起始月只在列首出现）、左侧星期标签（周一/周三/周五/周日），
  * 悬浮出卡片式 tooltip（日期 + 星期 + 指标值 + 当日模型数），点击带日期（过去）
  * 的格子下钻「当日模型明细」，与月/年热力共用同一个 selectedDay 状态。
@@ -16,6 +18,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { formatUnits } from './format'
+import { css, CheckIcon } from './hub'
 import type { UsageDay } from './aggregate'
 
 export type ActivityMode = 'day' | 'week' | 'cumulative'
@@ -30,6 +33,15 @@ export const METRIC_LABELS: Record<ActivityMetric, string> = {
   cache: '缓存',
   requests: '调用次数',
 }
+
+/** 指标下拉选项（卡头每周/累计左侧，口径与工具栏下拉一致）。 */
+export const METRIC_OPTIONS: Array<{ id: ActivityMetric; label: string }> = [
+  { id: 'tokens', label: '用量' },
+  { id: 'input', label: '输入' },
+  { id: 'output', label: '输出' },
+  { id: 'cache', label: '缓存' },
+  { id: 'requests', label: '调用次数' },
+]
 
 /** 单日某指标的数值（无数据 = 0）。 */
 export function metricValueOf(day: UsageDay | null | undefined, metric: ActivityMetric): number {
@@ -46,7 +58,7 @@ export function metricValueOf(day: UsageDay | null | undefined, metric: Activity
 /** 列数固定为 52 周（GitHub 年视图惯例）；数据不足时左侧自然留空。 */
 export const ACTIVITY_COLUMNS = 52
 const CELL = 14
-const GAP = 3
+const GAP = 2
 const RADIUS = 3
 const TIP_GAP = 8
 const BLUE = [31, 111, 235] as const
@@ -163,6 +175,7 @@ export function weekdayIndex(key: string): number {
   const [y, m, d] = key.split('-').map(Number)
   return (new Date(y, (m ?? 1) - 1, d ?? 1).getDay() + 6) % 7
 }
+
 
 export interface ActivityCell {
   key: string
@@ -352,17 +365,21 @@ const MODES: Array<{ id: ActivityMode; index: number; label: string }> = [
 
 interface HoverState { cell: ActivityCell; left: number; top: number }
 
-export function ActivityGrid({ days, mode, onMode, selectedKey, onSelect, metric = 'tokens', title = 'Token 活动', subtitle = '52 周滚动热力图，点击格子查看当日模型明细' }: {
+export function ActivityGrid({ days, mode, onMode, selectedKey, onSelect, metric = 'tokens', onMetricChange, metricPicker = false, title = 'Token 活动', subtitle = '52 周滚动热力图，点击格子查看当日模型明细' }: {
   days: UsageDay[] | null
   mode: ActivityMode
   onMode: (mode: ActivityMode) => void
   selectedKey: string | null
   onSelect: (key: string) => void
   metric?: ActivityMetric
+  /** 传入后在每周/累计左侧渲染指标下拉（明细 tab 用）。 */
+  onMetricChange?: (metric: ActivityMetric) => void
+  metricPicker?: boolean
   title?: string
   subtitle?: string
 }): JSX.Element {
   const [hover, setHover] = useState<HoverState | null>(null)
+  const [metricMenuOpen, setMetricMenuOpen] = useState(false)
   const snapshot = useMemo(() => buildActivityGrid(days, mode, new Date(), metric), [days, mode, metric])
 
   useEffect(() => ensureActivityStyles(), [])
@@ -407,7 +424,43 @@ export function ActivityGrid({ days, mode, onMode, selectedKey, onSelect, metric
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 14, lineHeight: '22px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' }}>{title}</span>
         <span style={{ fontSize: 12, lineHeight: '18px', color: 'var(--dsw-alias-label-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</span>
-        <span style={{ marginLeft: 'auto' }}>
+        <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {metricPicker && onMetricChange !== undefined && (
+            <span className={css.dropWrap}>
+              <button
+                type="button"
+                className={css.toolButton}
+                style={{ height: 24, padding: '0 8px', fontSize: 11, gap: 4, lineHeight: '16px' }}
+                aria-haspopup="menu"
+                aria-expanded={metricMenuOpen || undefined}
+                onClick={() => { setMetricMenuOpen(v => !v) }}
+                title="活动指标口径"
+              >
+                {METRIC_OPTIONS.find(m => m.id === metric)?.label ?? '用量'}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ opacity: 0.7 }}>
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              {metricMenuOpen && (
+                <>
+                  <button type="button" className={css.bulkOverlay} aria-label="关闭" onClick={() => { setMetricMenuOpen(false) }} />
+                  <div className={css.dropMenu} role="menu" aria-label="活动指标口径" style={{ left: 'auto', right: 0 }}>
+                    {METRIC_OPTIONS.map(m => (
+                      <button
+                        key={m.id}
+                        type="button" role="menuitemradio" className={css.dropItem} aria-checked={m.id === metric}
+                        onClick={() => { onMetricChange(m.id); setMetricMenuOpen(false) }}
+                      >
+                        <span className={css.dropCheck} data-on={m.id === metric || undefined} aria-hidden="true"><CheckIcon size={11} /></span>
+                        {m.label}
+                        <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--dsw-alias-label-tertiary)' }}>{METRIC_LABELS[m.id]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </span>
+          )}
           <span
             className="dsh-activity-tabs"
             role="group"
@@ -431,17 +484,17 @@ export function ActivityGrid({ days, mode, onMode, selectedKey, onSelect, metric
         </span>
       </div>
 
-      {/* 7 行 × 52 列贡献网格：整块居中，窄视口横向滚动兜底 */}
+      {/* 7 行 × 52 列贡献网格：正方形格子固定 14px，不拉伸；窄视口横向滚动兜底 */}
       <div style={{ overflowX: 'auto', marginTop: 12, paddingBottom: 2 }}>
-        <div style={{ width: 'max-content', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
-          {/* 月份标签行（GitHub 惯例：新月份第一周列首标注，跳过首列） */}
+        <div style={{ display: 'flex', flexDirection: 'column', width: 'fit-content', margin: '0 auto' }}>
+          {/* 月份标签行（GitHub 惯例：新月份第一周列首标注，跳过首列；按列比例定位，与拉伸后的列对齐） */}
           <div style={{ position: 'relative', height: 16, marginLeft: 30 }}>
             {snapshot.monthLabels.map(m => (
               <span
                 key={m.column}
                 style={{
                   position: 'absolute',
-                  left: m.column * (CELL + GAP),
+                  left: `${m.column * (CELL + GAP)}px`,
                   top: 0,
                   fontSize: 11,
                   lineHeight: '16px',
@@ -456,7 +509,7 @@ export function ActivityGrid({ days, mode, onMode, selectedKey, onSelect, metric
           </div>
           {/* 星期行：周一/周三/周五/周日（与参考稿一致，隔行标注） */}
           {snapshot.rows.map((row, rowIndex) => (
-            <div key={rowIndex} style={{ display: 'flex', alignItems: 'center', height: CELL + GAP, marginTop: rowIndex === 0 ? 0 : GAP }}>
+            <div key={rowIndex} style={{ display: 'flex', alignItems: 'center', marginTop: rowIndex === 0 ? 0 : GAP }}>
               <span
                 style={{
                   flex: 'none',
@@ -471,7 +524,7 @@ export function ActivityGrid({ days, mode, onMode, selectedKey, onSelect, metric
               >
                 {rowIndex % 2 === 0 ? WEEKDAYS[rowIndex] : ''}
               </span>
-              <span style={{ display: 'flex', gap: GAP }}>
+              <span style={{ display: 'flex', gap: GAP, flex: 'none' }}>
                 {row.map(cell => {
                   if (!cell.past) {
                     return (

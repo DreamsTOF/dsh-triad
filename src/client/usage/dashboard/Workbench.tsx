@@ -1,7 +1,7 @@
 /**
  * Workbench — 用量工作台（Skills Hub 风格骨架）。
  *
- * 布局照搬技能面板：左侧分类导航（趋势/明细/信号/余额配额，图标 + 计数）、
+ * 布局照搬技能面板：左侧分类导航（明细/趋势/信号/余额配额，图标 + 计数）、
  * 主区统计行 + 工具栏 + 内容滚动区。查询范围（RangePicker）收进左栏
  * 「查询范围」分组，与技能面板「快捷筛选」同款交互。
  *
@@ -19,14 +19,14 @@ import { usageApi } from './api'
 import { formatUnits } from './format'
 import { filterDays } from './range'
 import { splitModelKey } from './aggregate'
-import { ensureHubStyles, css, HubCatItem, trendIcon, detailIcon, signalIcon, walletIcon } from './hub'
+import { ensureHubStyles, css, HubCatItem, trendIcon, detailIcon, signalIcon, walletIcon, CheckIcon } from './hub'
 import { PshBody, PopoverShell, type PopoverAnchor, type PopoverSize } from '../../popover-shell'
 
 export type TabKey = 'trend' | 'detail' | 'signal' | 'accounts'
 
 const NAV: Array<{ key: TabKey; label: string; icon: (size?: number, stroke?: number) => JSX.Element }> = [
-  { key: 'trend', label: '趋势', icon: trendIcon },
   { key: 'detail', label: '明细', icon: detailIcon },
+  { key: 'trend', label: '趋势', icon: trendIcon },
   { key: 'signal', label: '信号', icon: signalIcon },
   { key: 'accounts', label: '余额/配额', icon: walletIcon },
 ]
@@ -100,7 +100,7 @@ function ProviderFilter({ value, options, onChange }: { value: string; options: 
                 type="button" role="menuitemradio" className={css.dropItem} aria-checked={p.name === value}
                 onClick={() => { onChange(p.name); setOpen(false) }}
               >
-                <span className={css.dropCheck} data-on={p.name === value || undefined} aria-hidden="true">{p.name === value ? '✓' : ''}</span>
+                <span className={css.dropCheck} data-on={p.name === value || undefined} aria-hidden="true"><CheckIcon size={11} /></span>
                 {p.name === 'all' ? '全部供应商' : p.name}
                 {p.name !== 'all' && (
                   <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--dsw-alias-label-tertiary)' }}>{formatUnits(p.tokens)}</span>
@@ -115,7 +115,7 @@ function ProviderFilter({ value, options, onChange }: { value: string; options: 
 }
 
 export function Workbench({ onClose, closing = false, anchor = null, onCardMouseEnter, onCardMouseLeave, renderTab }: WorkbenchProps): JSX.Element {
-  const [tab, setTab] = useState<TabKey>('trend')
+  const [tab, setTab] = useState<TabKey>('detail')
   const [preset, setPreset] = useState<RangePreset>('today')
   const [custom, setCustom] = useState<DateRange | null>(null)
   const [refreshTick, setRefreshTick] = useState(0)

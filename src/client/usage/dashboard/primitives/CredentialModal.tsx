@@ -5,6 +5,7 @@
  */
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { CloseIcon } from '../hub'
 
 const STYLE_ID = 'dsh-cred-modal-styles'
 const SHEET = `
@@ -114,8 +115,8 @@ export function CredentialModal({ providerName, onClose, onSave }: {
         <div style={headerStyle}>
           <span>配置 {providerName} 凭据</span>
           <button type="button" aria-label="关闭" onClick={close}
-            style={{ border: 'none', background: 'transparent', color: 'var(--dsw-alias-label-secondary)', cursor: 'pointer', fontSize: 15 }}>
-            ✕
+            style={{ border: 'none', background: 'transparent', color: 'var(--dsw-alias-label-secondary)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24 }}>
+            <CloseIcon size={13} />
           </button>
         </div>
         <div style={bodyStyle}>

@@ -50,16 +50,21 @@ export interface ModelRankRow {
   label: string
   value: number
   hitRate: number | null
+  /** 明细表直显用：按模型聚合的输入 / 输出 / 缓存（读+写）。 */
+  input: number
+  output: number
+  cache: number
 }
 
-/** 范围内按模型聚合的消耗排行（含命中率），按 tokens 降序。 */
+/** 范围内按模型聚合的消耗排行（含命中率 + 输入/输出/缓存明细），按 tokens 降序。 */
 export function modelRank(days: UsageDay[]): ModelRankRow[] {
-  const map = new Map<string, { tokens: number; input: number; cacheRead: number; cacheWrite: number }>()
+  const map = new Map<string, { tokens: number; input: number; output: number; cacheRead: number; cacheWrite: number }>()
   for (const d of days) {
     for (const m of d.models ?? []) {
-      const row = map.get(m.model) ?? { tokens: 0, input: 0, cacheRead: 0, cacheWrite: 0 }
+      const row = map.get(m.model) ?? { tokens: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
       row.tokens += m.tokens ?? 0
       row.input += m.inputTokens ?? 0
+      row.output += m.outputTokens ?? 0
       row.cacheRead += m.cacheReadTokens ?? 0
       row.cacheWrite += m.cacheWriteTokens ?? 0
       map.set(m.model, row)
@@ -72,6 +77,9 @@ export function modelRank(days: UsageDay[]): ModelRankRow[] {
         label,
         value: row.tokens,
         hitRate: prompt > 0 ? (row.cacheRead / prompt) * 100 : null,
+        input: row.input,
+        output: row.output,
+        cache: row.cacheRead + row.cacheWrite,
       }
     })
     .sort((a, b) => b.value - a.value)
