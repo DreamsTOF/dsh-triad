@@ -39,17 +39,18 @@
     "client": {
       "platform": "web",
       "inject": [
-        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-renderer",
         "@deepseek-ai/dsh-client-ui-slots",
         "@deepseek-ai/dsh-client-ui-conversation",
         "@deepseek-ai/dsh-client-ui-primitives",
-        "@deepseek-ai/dsh-client-ui-locale",
+        "@deepseek-ai/dsh-client-locale",
         "@deepseek-ai/dsh-client-ui-input-trigger",
         "@deepseek-ai/dsh-client-ui-tool"
       ]
     }
   },
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "yauzl": "^3.4.0"
   },
   "devDependencies": {
