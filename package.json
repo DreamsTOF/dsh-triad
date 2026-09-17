@@ -60,7 +60,7 @@
     "build": "node build.mjs",
     "smoke": "node scripts/smoke-client.mjs",
     "smoke:host": "node scripts/smoke-host.mjs",
-    "test": "node scripts/test-skill-manager.mjs && node scripts/test-skill-toggles.mjs"
+    "test": "node scripts/test-skill-manager.mjs && node scripts/test-skill-toggles.mjs && node scripts/test-mcp-layering.mjs && node scripts/test-mcp-tool-disable.mjs"
   },
   "engines": {
     "node": ">=22"
